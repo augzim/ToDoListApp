@@ -171,62 +171,76 @@ class ContentPanel(val dao: ToDoDataAccessObject) : JPanel() {
     }
 
     fun createItemPanel(item: Item): JPanel {
-        val contentPanel = this
+        val textPanel = createItemTextPanel(item)
+        val itemPanel = createItemEntirePanel(textPanel)
+        return itemPanel
+    }
 
-        val textPanel = JPanel().apply {
+    private fun createItemTextPanel(item: Item): JPanel {
+        return JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
+
             add(JLabel(item.title))
 
             if (item is Task) {
-                if (item.deadline != null) {
-                    val format = SimpleDateFormat("dd/MM/yyyy hh:mm")
-                    add(JLabel(format.format(item.deadline).toString()))
+                item.deadline?.let {
+                    val format = SimpleDateFormat("dd/MM/yyyy HH:mm")
+                    add(JLabel(format.format(it)))
                 }
+
                 if (item.categories.isNotEmpty()) {
                     add(JLabel(item.categories.joinToString(" ")))
                 }
             }
         }
+    }
+
+    private fun createItemEntirePanel(textPanel: JPanel): JPanel {
+        val contentPanel = this
 
         val itemPanel = JPanel()
+
         itemPanel.apply {
             layout = BoxLayout(this, BoxLayout.X_AXIS)
             border = BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
             )
+
             add(textPanel)
             add(Box.createHorizontalGlue())
-            // edit button
-            val editButton = JButton("Edit")
-            add(editButton)
+
             // todo add listener to edit button
-
-            // delete button
+            val editButton = JButton("Edit")
             val deleteButton = JButton("Delete")
+
             deleteButton.addActionListener {
-                val parentWindow = SwingUtilities.getWindowAncestor(this)
-
-                val option = JOptionPane.showConfirmDialog(
-                    parentWindow,
-                    "Do you want to delete the item?",
-                    "Confirm Deletion",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.PLAIN_MESSAGE
-                )
-
-                if (option == JOptionPane.YES_OPTION) {
-                    JOptionPane.showMessageDialog(parentWindow, "Item deleted!")
-                    contentPanel.remove(itemPanel)
-                    contentPanel.revalidate()
-                    contentPanel.repaint()
-                } else {
-                    JOptionPane.showMessageDialog(parentWindow, "Delete operation canceled")
-                }
+                deleteItemPanel(contentPanel, itemPanel)
             }
+
+            add(editButton)
             add(deleteButton)
         }
+
         return itemPanel
+    }
+
+    private fun deleteItemPanel(contentPanel: JPanel, itemPanel: JPanel) {
+        val parentWindow = SwingUtilities.getWindowAncestor(contentPanel)
+
+        val option = JOptionPane.showConfirmDialog(
+            parentWindow,
+            "Do you want to delete the item?",
+            "Confirm Deletion",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+        )
+
+        if (option == JOptionPane.YES_OPTION) {
+            contentPanel.remove(itemPanel)
+            contentPanel.revalidate()
+            contentPanel.repaint()
+        }
     }
 }
 
