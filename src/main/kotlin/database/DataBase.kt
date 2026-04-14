@@ -7,7 +7,8 @@ import java.sql.Timestamp
 import java.util.Properties
 
 
-data class Category(
+// todo transfer to a separate file Item.kt?
+abstract class Item(
     val id: Int,
     val title: String,
     val createdAt: Timestamp,
@@ -16,14 +17,23 @@ data class Category(
     override fun toString(): String = title
 }
 
-data class Task(
-    val id: Int,
-    val title: String,
+
+class Category(
+    id: Int,
+    title: String,
+    createdAt: Timestamp,
+) : Item(id, title, createdAt)
+
+
+class Task(
+    id: Int,
+    title: String,
     val description: String?,
     val categories: List<Category>,
-    val createdAt: Timestamp,
+    createdAt: Timestamp,
     val deadline: Timestamp?,
-)
+) : Item(id, title, createdAt)
+
 
 enum class TimeFilter {
     TODAY,
@@ -32,10 +42,12 @@ enum class TimeFilter {
     YEAR
 }
 
+
 enum class DeadlineFilter {
     WITH_DEADLINE,
     WITHOUT_DEADLINE
 }
+
 
 fun getConnection(): Connection {
     val port = System.getenv("DB_PORT")
@@ -321,9 +333,9 @@ open class ToDoDataAccessObject(private val conn: Connection) {
 
         val condition = when (time) {
             TimeFilter.TODAY -> "DATE(deadline) = CURRENT_DATE"
-            TimeFilter.WEEK  -> "deadline >= date_trunc('week', CURRENT_DATE) AND deadline < date_trunc('week', CURRENT_DATE) + interval '1 week'"
+            TimeFilter.WEEK -> "deadline >= date_trunc('week', CURRENT_DATE) AND deadline < date_trunc('week', CURRENT_DATE) + interval '1 week'"
             TimeFilter.MONTH -> "date_trunc('month', deadline) = date_trunc('month', CURRENT_DATE)"
-            TimeFilter.YEAR  -> "date_trunc('year', deadline) = date_trunc('year', CURRENT_DATE)"
+            TimeFilter.YEAR -> "date_trunc('year', deadline) = date_trunc('year', CURRENT_DATE)"
         }
 
         val stmt = conn.prepareStatement(
@@ -366,20 +378,3 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         deleteTasks(listOf(taskId))
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

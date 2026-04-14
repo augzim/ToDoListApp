@@ -1,21 +1,16 @@
 package ui
 
 import database.DeadlineFilter
+import database.Item
+import database.Task
 import database.TimeFilter
 import database.ToDoDataAccessObject
+import java.awt.BorderLayout
 import java.awt.Color
-import javax.swing.BorderFactory
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.JPanel
-import javax.swing.JScrollPane
-import javax.swing.JSpinner
-import javax.swing.JTextArea
-import javax.swing.JTextField
-import javax.swing.ListSelectionModel
-import javax.swing.SpinnerDateModel
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.text.SimpleDateFormat
+import javax.swing.*
 
 
 class Sidebar(
@@ -136,7 +131,7 @@ class ContentPanel(val dao: ToDoDataAccessObject) : JPanel() {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         val categories = dao.getAllCategories()
         for (category in categories) {
-            add(JButton(category.title))
+            add(createItemPanel(category))
         }
         revalidate()
         repaint()
@@ -147,7 +142,7 @@ class ContentPanel(val dao: ToDoDataAccessObject) : JPanel() {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         val tasks = dao.getTasksByTime(timeFilter)
         for (task in tasks) {
-            add(JLabel(task.title))
+            add(createItemPanel(task))
         }
         revalidate()
         repaint()
@@ -158,7 +153,7 @@ class ContentPanel(val dao: ToDoDataAccessObject) : JPanel() {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         val tasks = dao.getTasksByCategoryId(categoryId)
         for (task in tasks) {
-            add(JLabel(task.title))
+            add(createItemPanel(task))
         }
         revalidate()
         repaint()
@@ -169,12 +164,70 @@ class ContentPanel(val dao: ToDoDataAccessObject) : JPanel() {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         val tasks = dao.getTasksByDeadline(deadlineFilter)
         for (task in tasks) {
-            add(JLabel(task.title))
+            add(createItemPanel(task))
         }
         revalidate()
         repaint()
     }
 
+    fun createItemPanel(item: Item): JPanel {
+        val contentPanel = this
+
+        val textPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            add(JLabel(item.title))
+
+            if (item is Task) {
+                if (item.deadline != null) {
+                    val format = SimpleDateFormat("dd/MM/yyyy hh:mm")
+                    add(JLabel(format.format(item.deadline).toString()))
+                }
+                if (item.categories.isNotEmpty()) {
+                    add(JLabel(item.categories.joinToString(" ")))
+                }
+            }
+        }
+
+        val itemPanel = JPanel()
+        itemPanel.apply {
+            layout = BoxLayout(this, BoxLayout.X_AXIS)
+            border = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            )
+            add(textPanel)
+            add(Box.createHorizontalGlue())
+            // edit button
+            val editButton = JButton("Edit")
+            add(editButton)
+            // todo add listener to edit button
+
+            // delete button
+            val deleteButton = JButton("Delete")
+            deleteButton.addActionListener {
+                val parentWindow = SwingUtilities.getWindowAncestor(this)
+
+                val option = JOptionPane.showConfirmDialog(
+                    parentWindow,
+                    "Do you want to delete the item?",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.PLAIN_MESSAGE
+                )
+
+                if (option == JOptionPane.YES_OPTION) {
+                    JOptionPane.showMessageDialog(parentWindow, "Item deleted!")
+                    contentPanel.remove(itemPanel)
+                    contentPanel.revalidate()
+                    contentPanel.repaint()
+                } else {
+                    JOptionPane.showMessageDialog(parentWindow, "Delete operation canceled")
+                }
+            }
+            add(deleteButton)
+        }
+        return itemPanel
+    }
 }
 
 
