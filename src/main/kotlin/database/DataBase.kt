@@ -8,31 +8,28 @@ import java.util.Properties
 
 
 // todo transfer to a separate file Item.kt?
-abstract class Item(
-    val id: Int,
-    val title: String,
-    val createdAt: Timestamp,
-) {
-    // todo add comment (JList needs it in UI.kt CreateEntityPanel.showCreateTask)
-    override fun toString(): String = title
+sealed interface Item {
+    val id: Int
+    val title: String
+    val createdAt: Timestamp
 }
 
 
-class Category(
-    id: Int,
-    title: String,
-    createdAt: Timestamp,
-) : Item(id, title, createdAt)
+data class Category(
+    override val id: Int,
+    override val title: String,
+    override val createdAt: Timestamp,
+) : Item
 
 
-class Task(
-    id: Int,
-    title: String,
+data class Task(
+    override val id: Int,
+    override val title: String,
     val description: String?,
     val categories: List<Category>,
-    createdAt: Timestamp,
+    override val createdAt: Timestamp,
     val deadline: Timestamp?,
-) : Item(id, title, createdAt)
+) : Item
 
 
 enum class TimeFilter {
@@ -93,7 +90,7 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         stmt.executeUpdate()
     }
 
-    fun deleteCategories(categoryIds: List<Int>) {
+    fun deleteCategories(categoryIds: Set<Int>) {
         val stmt = conn.prepareStatement(
             """
             DELETE  
@@ -153,7 +150,7 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         return taskCategories
     }
 
-    protected fun createTaskCategoryLinks(taskId: Int, categoryIds: List<Int>) {
+    protected fun createTaskCategoryLinks(taskId: Int, categoryIds: Set<Int>) {
         val stmt = conn.prepareStatement(
             """
             INSERT INTO tasks_categories(task_id, category_id)
@@ -200,7 +197,7 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         return taskId
     }
 
-    fun createTask(title: String, description: String?, deadline: Timestamp?, categoryIds: List<Int>) {
+    fun createTask(title: String, description: String?, deadline: Timestamp?, categoryIds: Set<Int>) {
         conn.autoCommit = false
 
         try {
@@ -213,7 +210,7 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         }
     }
 
-    fun deleteTasks(taskIds: List<Int>) {
+    fun deleteTasks(taskIds: Set<Int>) {
         conn.autoCommit = false
         val stmt = conn.prepareStatement(
             "DELETE FROM tasks WHERE id = ANY (?)"
@@ -375,6 +372,6 @@ open class ToDoDataAccessObject(private val conn: Connection) {
     }
 
     fun completeTask(taskId: Int) {
-        deleteTasks(listOf(taskId))
+        deleteTasks(setOf(taskId))
     }
 }

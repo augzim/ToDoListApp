@@ -3,8 +3,7 @@
 
 plugins {
     kotlin("jvm") version "2.3.10"
-    id("org.jetbrains.compose") version "1.6.11"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
+    application
 }
 
 group = "org.example"
@@ -18,14 +17,11 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("org.postgresql:postgresql:42.7.10")
-    implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
+    implementation("com.miglayout:miglayout-swing:11.4.3")
 }
 
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-    }
+application {
+    mainClass.set("MainKt")
 }
 
 kotlin {
