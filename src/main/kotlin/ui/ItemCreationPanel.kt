@@ -5,6 +5,7 @@ import service.ItemService
 import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
+import java.sql.Time
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -99,6 +100,18 @@ class ItemCreationPanel(
     ) = JButton("Done").apply {
 
         addActionListener {
+            // todo duplicate code
+            val title = titleField.text.trim()
+            if (!isTitleValid(title)) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Title length must be > 0 and < 150 symbols!",
+                    "Invalid title",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return@addActionListener
+            }
+
             itemService.createCategory(title = titleField.text)
 
             contentPanel.refresh()
@@ -230,8 +243,29 @@ class ItemCreationPanel(
         addActionListener {
             val deadline = extractDeadline(dateSpinner, timeSpinner)
 
+            if (!isDeadlineValid(deadline)) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Deadline must be in the future!",
+                    "Invalid date",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return@addActionListener
+            }
+
+            val title = titleField.text.trim()
+            if (!isTitleValid(title)) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Title length must be > 0 and < 150 symbols!",
+                    "Invalid title",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return@addActionListener
+            }
+
             itemService.createTask(
-                title = titleField.text,
+                title = title,
                 description = null,
                 deadline = deadline,
                 categoryIds = categoryButtonState.ids
@@ -254,6 +288,15 @@ class ItemCreationPanel(
 
         return Timestamp.valueOf(LocalDateTime.of(date, time))
     }
+
+    // todo this func (static) seems to be better removed from class
+    private fun isDeadlineValid(deadline: Timestamp): Boolean {
+        val now = Date()
+        return deadline.after(now)
+    }
+
+    private fun isTitleValid(title: String) =
+        !(title.isEmpty() || title.length > 150)
 
     private fun clearTaskForm(
         titleField: JTextArea,
