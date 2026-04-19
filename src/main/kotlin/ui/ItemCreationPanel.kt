@@ -35,21 +35,50 @@ class ItemCreationPanel(
     val contentPanel: ContentPanel,
     val itemService: ItemService
 ) : JPanel() {
+
     init {
-        showCreateTask()
+        showCreateCategory()
     }
 
-//    fun showCreateCategory() {
-//        removeAll()
-//        layout = BoxLayout(this, BoxLayout.Y_AXIS)
-//        // enter title
-//
-//        // show done button
-//        // when pressed show empty fields for creating task again
-//        revalidate()
-//        repaint()
-//    }
+    fun showCreateItem() {}
 
+    // ------------ CATEGORY ------------
+    fun showCreateCategory() {
+        removeAll()
+        layout = MigLayout(
+            "wrap 1, gap 25",
+            "[grow, fill]",
+            "[] [] push []"
+        )
+
+        val header = createHeader("New Category")
+        val titleField = createTitleField()
+
+        add(header)
+        add(titleField, "growx")
+        add(createCategoryDoneButton(titleField))
+
+        revalidate()
+        repaint()
+    }
+
+    private fun createCategoryDoneButton(
+        titleField: JTextArea
+    ) = JButton("Done").apply {
+
+        addActionListener {
+            itemService.createCategory(title = titleField.text)
+
+            contentPanel.refresh()
+            clearCategoryForm(titleField)
+        }
+    }
+
+    private fun clearCategoryForm(titleField: JTextArea) {
+        titleField.text = ""
+    }
+
+    // -------------- TASK --------------
     fun showCreateTask() {
         removeAll()
         layout = MigLayout(
@@ -70,7 +99,7 @@ class ItemCreationPanel(
         add(categoryPanel)
         add(createDatePanel("Date", dateSpinner))
         add(createDatePanel("Time", timeSpinner))
-        add(createDoneButton(titleField, dateSpinner, timeSpinner, categoryButtonState))
+        add(createTaskDoneButton(titleField, dateSpinner, timeSpinner, categoryButtonState))
 
         revalidate()
         repaint()
@@ -157,7 +186,7 @@ class ItemCreationPanel(
             add(component)
         }
 
-    private fun createDoneButton(
+    private fun createTaskDoneButton(
         titleField: JTextArea,
         dateSpinner: JSpinner,
         timeSpinner: JSpinner,
@@ -175,7 +204,7 @@ class ItemCreationPanel(
             )
 
             contentPanel.refresh()
-            clearForm(titleField, dateSpinner, timeSpinner, categoryButtonState)
+            clearTaskForm(titleField, dateSpinner, timeSpinner, categoryButtonState)
         }
     }
 
@@ -192,7 +221,7 @@ class ItemCreationPanel(
         return Timestamp.valueOf(LocalDateTime.of(date, time))
     }
 
-    private fun clearForm(
+    private fun clearTaskForm(
         titleField: JTextArea,
         dateSpinner: JSpinner,
         timeSpinner: JSpinner,
