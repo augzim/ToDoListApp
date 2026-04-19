@@ -4,6 +4,7 @@ import net.miginfocom.swing.MigLayout
 import service.ItemService
 import java.awt.Color
 import java.awt.Component
+import java.awt.Dimension
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -37,10 +38,39 @@ class ItemCreationPanel(
 ) : JPanel() {
 
     init {
-        showCreateCategory()
+        preferredSize = Dimension(200, 600)
+        showCreateItem()
     }
 
-    fun showCreateItem() {}
+    // ------------- HEADER -------------
+    fun showCreateItem() {
+        removeAll()
+        layout = MigLayout(
+            "wrap 1, gap 25",
+            "[grow, fill]",
+            "[] []"
+        )
+        showCreateItemHeader()
+    }
+
+    fun showCreateItemHeader() {
+        val categoryButton = JButton("New Category").apply {
+            addActionListener {
+                showCreateCategory()
+                revalidate()
+                repaint()
+            }
+        }
+        val taskButton = JButton("New Task").apply {
+            addActionListener {
+                showCreateTask()
+                revalidate()
+                repaint()
+            }
+        }
+        add(categoryButton)
+        add(taskButton)
+    }
 
     // ------------ CATEGORY ------------
     fun showCreateCategory() {
@@ -48,14 +78,16 @@ class ItemCreationPanel(
         layout = MigLayout(
             "wrap 1, gap 25",
             "[grow, fill]",
-            "[] [] push []"
+            "[] [] [] [] push []"
         )
+
+        showCreateItemHeader()
 
         val header = createHeader("New Category")
         val titleField = createTitleField()
 
         add(header)
-        add(titleField, "growx")
+        add(titleField)
         add(createCategoryDoneButton(titleField))
 
         revalidate()
@@ -84,8 +116,10 @@ class ItemCreationPanel(
         layout = MigLayout(
             "wrap 1, gap 25",
             "[grow, fill]",
-            "[] [] [] [] [] push []"
+            "[] [] [] [] [] [] [] push []"
         )
+
+        showCreateItemHeader()
 
         val header = createHeader("New Task")
         val titleField = createTitleField()
