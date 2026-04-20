@@ -9,6 +9,7 @@ import database.ToDoDataAccessObject
 import java.sql.Timestamp
 
 
+// todo entire class seems a bit redundant (use dao in UI directly)?
 class ItemService(val dao: ToDoDataAccessObject) {
     // ---------- CREATE ----------
     fun createTask(
@@ -43,5 +44,14 @@ class ItemService(val dao: ToDoDataAccessObject) {
             is Task -> dao.deleteTasks(setOf(item.id))
             is Category -> dao.deleteCategories(setOf(item.id))
         }
+    }
+
+    // ---------- UPDATE ----------
+    fun updateCategory(categoryId: Int, title: String) {
+        dao.updateCategory(categoryId, title)
+    }
+
+    fun updateTask(taskId: Int, title: String, description: String?, deadline: Timestamp?, categoryIds: Set<Int>) {
+        dao.updateTask(taskId, title, description, deadline, categoryIds)
     }
 }

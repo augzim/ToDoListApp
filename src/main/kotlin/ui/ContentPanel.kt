@@ -17,7 +17,10 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
 
-class ContentPanel(val itemService: ItemService) : JPanel() {
+class ContentPanel(
+    val itemService: ItemService,
+    val mediator: Mediator,
+) : JPanel() {
     // todo what should be in init and what inside property block here?
     private var currentView: ViewMode = ViewMode.Empty
 
@@ -105,13 +108,17 @@ class ContentPanel(val itemService: ItemService) : JPanel() {
             add(textPanel)
             add(Box.createHorizontalGlue())
 
-            // todo add listener to edit button
-            val editButton = JButton("Edit")
-            val deleteButton = JButton("Delete")
+            val editButton = JButton("Edit").apply {
+                addActionListener {
+                    mediator.notify(this, Event.ItemUpdated(item))
+                }
+            }
 
-            deleteButton.addActionListener {
-                deleteItemPanel(item)
-                itemService.delete(item)
+            val deleteButton = JButton("Delete").apply {
+                addActionListener {
+                    deleteItemPanel(item)
+                    itemService.delete(item)
+                }
             }
 
             add(editButton)

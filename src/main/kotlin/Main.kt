@@ -31,7 +31,7 @@ fun main() {
 
         val rootPanel = JPanel(BorderLayout())
         val mediator = MainMediator()
-        val contentPanelView = ContentPanel(itemService)
+        val contentPanelView = ContentPanel(itemService, mediator)
         val sidebarView = Sidebar(
             Color.PINK,
             dao,

@@ -315,13 +315,144 @@ class ItemCreationPanel(
     // -------- UPDATE ITEM --------
     fun editItemPanel(item: Item) {
         when (item) {
-            is Category -> editCategory(item)
-            is Task -> editTask(item)
+            is Category -> showEditCategory(item)
+            is Task -> showEditTask(item)
         }
     }
 
-    private fun editCategory(category: Category) {}
+    private fun showEditCategory(category: Category) {
+        removeAll()
+        layout = MigLayout(
+            "wrap 1, gap 25",
+            "[grow, fill]",
+            "[] [] [] [] push []"
+        )
 
-    private fun editTask(task: Task) {}
+        showCreateItemHeader()
 
+        val header = createHeader("New Category")
+        val titleField = createTitleField().apply {
+            text = category.title
+        }
+
+        add(header)
+        add(titleField)
+        add(createCategoryEditButton(category.id, titleField))
+
+        revalidate()
+        repaint()
+    }
+
+    private fun createCategoryEditButton(
+        categoryId: Int,
+        titleField: JTextArea
+    ) = JButton("Done").apply {
+
+        addActionListener {
+            // todo duplicate code
+            val title = titleField.text.trim()
+            if (!isTitleValid(title)) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Title length must be > 0 and < 150 symbols!",
+                    "Invalid title",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return@addActionListener
+            }
+
+            itemService.updateCategory(categoryId, title = titleField.text)
+            mediator.notify(this, Event.ItemCreated)
+            clearCategoryForm(titleField)
+        }
+    }
+
+    private fun showEditTask(task: Task) {
+        removeAll()
+        layout = MigLayout(
+            "wrap 1, gap 25",
+            "[grow, fill]",
+            "[] [] [] [] [] [] [] push []"
+        )
+
+        showCreateItemHeader()
+
+        val header = createHeader("Edit Task")
+        val titleField = createTitleField().apply {
+            text = task.title
+        }
+        val categoryButtonState = CategoryButtonState(itemService).apply {
+            ids = task.categories.map { it.id }.toSet()
+        }
+        val categoryPanel = createCategoryPanel(categoryButtonState)
+
+        // todo  deadline == null is not supported in entire app so far (will be in the future)
+        val dateSpinner = createDateSpinner(DateFormatPattern.Date)
+        val timeSpinner = createDateSpinner(DateFormatPattern.Time)
+
+        val dateTime = task.deadline
+        if (dateTime != null) {
+            val date = Date.from(dateTime.toInstant())
+            dateSpinner.value = date
+            timeSpinner.value = date
+        } else {
+            dateSpinner.value = Date()
+            timeSpinner.value = Date()
+        }
+
+        add(header)
+        add(titleField, "growx")
+        add(categoryPanel)
+        add(createDatePanel("Date", dateSpinner))
+        add(createDatePanel("Time", timeSpinner))
+        add(createTaskEditButton(task.id, titleField, dateSpinner, timeSpinner, categoryButtonState))
+
+        revalidate()
+        repaint()
+    }
+
+    private fun createTaskEditButton(
+        taskId: Int,
+        titleField: JTextArea,
+        dateSpinner: JSpinner,
+        timeSpinner: JSpinner,
+        categoryButtonState: CategoryButtonState
+    ) = JButton("Done").apply {
+
+        addActionListener {
+            val deadline = extractDeadline(dateSpinner, timeSpinner)
+
+            if (!isDeadlineValid(deadline)) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Deadline must be in the future!",
+                    "Invalid date",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return@addActionListener
+            }
+
+            val title = titleField.text.trim()
+            if (!isTitleValid(title)) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Title length must be > 0 and < 150 symbols!",
+                    "Invalid title",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return@addActionListener
+            }
+
+            itemService.updateTask(
+                taskId,
+                title = title,
+                description = null,
+                deadline = deadline,
+                categoryIds = categoryButtonState.ids
+            )
+
+            mediator.notify(this, Event.ItemCreated)
+            clearTaskForm(titleField, dateSpinner, timeSpinner, categoryButtonState)
+        }
+    }
 }

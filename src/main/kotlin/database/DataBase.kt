@@ -228,7 +228,7 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         }
     }
 
-    protected fun updateTaskCategoryLinks(taskId: Int, categoryIds: List<Int>) {
+    protected fun updateTaskCategoryLinks(taskId: Int, categoryIds: Set<Int>) {
         // 1. Delete old relations
         val deleteStmt = conn.prepareStatement(
             "DELETE FROM tasks_categories WHERE task_id = ?"
@@ -278,7 +278,7 @@ open class ToDoDataAccessObject(private val conn: Connection) {
         stmt.executeUpdate()
     }
 
-    fun updateTask(taskId: Int, title: String, description: String?, deadline: Timestamp?, categoryIds: List<Int>) {
+    fun updateTask(taskId: Int, title: String, description: String?, deadline: Timestamp?, categoryIds: Set<Int>) {
         conn.autoCommit = false
 
         try {
