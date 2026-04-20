@@ -1,5 +1,8 @@
 package ui
 
+import database.Category
+import database.Item
+import database.Task
 import net.miginfocom.swing.MigLayout
 import service.ItemService
 import java.awt.Color
@@ -34,8 +37,8 @@ sealed class DateFormatPattern(val format: String) {
 
 
 class ItemCreationPanel(
-    val contentPanel: ContentPanel,
-    val itemService: ItemService
+    val itemService: ItemService,
+    val mediator: Mediator,
 ) : JPanel() {
 
     init {
@@ -113,8 +116,7 @@ class ItemCreationPanel(
             }
 
             itemService.createCategory(title = titleField.text)
-
-            contentPanel.refresh()
+            mediator.notify(this, Event.ItemCreated)
             clearCategoryForm(titleField)
         }
     }
@@ -271,7 +273,7 @@ class ItemCreationPanel(
                 categoryIds = categoryButtonState.ids
             )
 
-            contentPanel.refresh()
+            mediator.notify(this, Event.ItemCreated)
             clearTaskForm(titleField, dateSpinner, timeSpinner, categoryButtonState)
         }
     }
@@ -309,4 +311,17 @@ class ItemCreationPanel(
         dateSpinner.value = Date()
         timeSpinner.value = Date()
     }
+
+    // -------- UPDATE ITEM --------
+    fun editItemPanel(item: Item) {
+        when (item) {
+            is Category -> editCategory(item)
+            is Task -> editTask(item)
+        }
+    }
+
+    private fun editCategory(category: Category) {}
+
+    private fun editTask(task: Task) {}
+
 }

@@ -3,6 +3,7 @@ import database.ToDoDataAccessObject
 import service.ItemService
 import ui.ContentPanel
 import ui.ItemCreationPanel
+import ui.MainMediator
 import ui.Sidebar
 
 import java.awt.BorderLayout
@@ -22,28 +23,37 @@ fun main() {
 
         val frame = JFrame("To Do List App").apply {
             defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
-            setSize(500, 400)
-            isVisible = true
-            setLocationRelativeTo(null)
             minimumSize = Dimension(200, 100)
+            isVisible = true
+            setSize(500, 400)
+            setLocationRelativeTo(null)
         }
 
         val rootPanel = JPanel(BorderLayout())
-        frame.add(rootPanel, BorderLayout.CENTER)
-
-        val contentPanel = ContentPanel(itemService)
-        rootPanel.add(contentPanel, BorderLayout.CENTER)
-
-        val sidebar = Sidebar(
+        val mediator = MainMediator()
+        val contentPanelView = ContentPanel(itemService)
+        val sidebarView = Sidebar(
             Color.PINK,
             dao,
-            contentPanel
+            mediator
         )
-        rootPanel.add(sidebar, BorderLayout.WEST)
+        val itemCreationPanelView =
+            ItemCreationPanel(itemService, mediator).apply {
+                background = Color.CYAN
+            }
 
-        val createEntityPanel = ItemCreationPanel(contentPanel, itemService)
-        createEntityPanel.background = Color.CYAN
-        rootPanel.add(createEntityPanel, BorderLayout.EAST)
-
+        mediator.apply {
+            sidebar = sidebarView
+            contentPanel = contentPanelView
+            itemCreationPanel = itemCreationPanelView
+        }
+        rootPanel.apply {
+            add(sidebarView, BorderLayout.WEST)
+            add(contentPanelView, BorderLayout.CENTER)
+            add(itemCreationPanelView, BorderLayout.EAST)
+        }
+        frame.apply {
+            add(rootPanel, BorderLayout.CENTER)
+        }
     }
 }

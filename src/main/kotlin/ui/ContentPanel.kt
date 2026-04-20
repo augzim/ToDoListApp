@@ -91,6 +91,7 @@ class ContentPanel(val itemService: ItemService) : JPanel() {
         }
     }
 
+    // todo refactor slightly
     private fun createItemPanel(item: Item): JPanel {
         val textPanel = createItemTextPanel(item)
 
@@ -119,6 +120,7 @@ class ContentPanel(val itemService: ItemService) : JPanel() {
     }
 
     // ---------- ACTIONS ----------
+    // todo rename to deleteItem
     private fun deleteItemPanel(item: Item) {
         val parentWindow = SwingUtilities.getWindowAncestor(this)
 

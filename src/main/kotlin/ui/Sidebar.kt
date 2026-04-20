@@ -10,49 +10,66 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 
+// todo refactor
+// todo remove color from constructor
+// todo replace dao with ItemService!
 class Sidebar(
     val color: Color,
     val dao: ToDoDataAccessObject,
-    val contentPanel: ContentPanel
+    val mediator: Mediator
 ) : JPanel() {
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        this.background = color
+        background = color
 
 
+        // todo this here are  buttons, not panels
         // categories
-        val categoriesButton = JButton("categories")
-        add(categoriesButton)
-
-        categoriesButton.addActionListener {
-            contentPanel.showCategories()
+        val categoriesButton = JButton("categories").apply {
+            addActionListener {
+                mediator.notify(
+                    this,
+                    Event.ListItemsButtonClicked(ViewMode.Categories)
+                )
+            }
         }
-
 
         // tasks
-        val tasksButton = JButton("tasks")
-        add(tasksButton)
         val tasksByPanel = createSubPanel(color, indent = 20)
-        add(tasksByPanel)
         // todo repeats 4 times
-        tasksButton.addActionListener {
-            tasksByPanel.isVisible = !tasksByPanel.isVisible
-            revalidate()
-            repaint()
+        val tasksButton = JButton("tasks").apply {
+            addActionListener {
+                tasksByPanel.isVisible = !tasksByPanel.isVisible
+                revalidate()
+                repaint()
+            }
         }
 
+        // todo add everything in the end
+        //  via apply?
+
+        add(categoriesButton)
+        add(tasksButton)
+        add(tasksByPanel)
+
         // by time
-        val tasksByTimeButton = JButton("by time")
-        tasksByPanel.add(tasksByTimeButton)
         val tasksByTimePanel = createSubPanel(color, indent = 20)
+        val tasksByTimeButton = JButton("by time")
+
+
+        tasksByPanel.add(tasksByTimeButton)
         tasksByPanel.add(tasksByTimePanel)
 
         TimeFilter.entries.forEach { timeFilter ->
             var button = JButton(timeFilter.toString().lowercase())
             tasksByTimePanel.add(button)
             button.addActionListener {
-                contentPanel.showTasksByTime(timeFilter)
+                mediator.notify(
+                    this,
+                    Event.ListItemsButtonClicked(ViewMode.TasksByTime(timeFilter))
+                )
             }
+
         }
 
         tasksByTimeButton.addActionListener {
@@ -72,7 +89,10 @@ class Sidebar(
             var button = JButton(deadlineFilter.toString().lowercase().replace('_', ' '))
             tasksByDeadlinePanel.add(button)
             button.addActionListener {
-                contentPanel.showTasksByDeadline(deadlineFilter)
+                mediator.notify(
+                    this,
+                    Event.ListItemsButtonClicked(ViewMode.TasksByDeadline(deadlineFilter))
+                )
             }
         }
 
@@ -95,7 +115,10 @@ class Sidebar(
             var button = JButton(category.title)
             tasksByCategoryPanel.add(button)
             button.addActionListener {
-                contentPanel.showTasksByCategory(category.id)
+                mediator.notify(
+                    this,
+                    Event.ListItemsButtonClicked(ViewMode.TasksByCategory(category.id))
+                )
             }
         }
 
