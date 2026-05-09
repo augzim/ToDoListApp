@@ -1,5 +1,6 @@
 package ui
 
+import database.Category
 import database.DeadlineFilter
 import database.Item
 import database.Task
@@ -118,6 +119,10 @@ class ContentPanel(
                 addActionListener {
                     deleteItemPanel(item)
                     itemService.delete(item)
+                    when (item) {
+                        is Task -> mediator.notify(this, Event.ItemDeleted.TaskDeleted)
+                        is Category -> mediator.notify(this, Event.ItemDeleted.CategoryDeleted)
+                    }
                 }
             }
 

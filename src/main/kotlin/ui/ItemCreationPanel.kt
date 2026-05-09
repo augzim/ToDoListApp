@@ -116,7 +116,7 @@ class ItemCreationPanel(
             }
 
             itemService.createCategory(title = titleField.text)
-            mediator.notify(this, Event.ItemCreated)
+            mediator.notify(this, Event.ItemCreated.CategoryCreated)
             clearCategoryForm(titleField)
         }
     }
@@ -273,7 +273,7 @@ class ItemCreationPanel(
                 categoryIds = categoryButtonState.ids
             )
 
-            mediator.notify(this, Event.ItemCreated)
+            mediator.notify(this, Event.ItemCreated.TaskCreated)
             clearTaskForm(titleField, dateSpinner, timeSpinner, categoryButtonState)
         }
     }
@@ -362,7 +362,7 @@ class ItemCreationPanel(
             }
 
             itemService.updateCategory(categoryId, title = titleField.text)
-            mediator.notify(this, Event.ItemCreated)
+            mediator.notify(this, Event.ItemCreated.CategoryCreated)
             clearCategoryForm(titleField)
         }
     }
@@ -451,7 +451,7 @@ class ItemCreationPanel(
                 categoryIds = categoryButtonState.ids
             )
 
-            mediator.notify(this, Event.ItemCreated)
+            mediator.notify(this, Event.ItemCreated.TaskCreated)
             clearTaskForm(titleField, dateSpinner, timeSpinner, categoryButtonState)
         }
     }

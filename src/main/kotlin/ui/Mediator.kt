@@ -1,15 +1,23 @@
 package ui
 
 import database.Item
+import database.Task
 import javax.swing.JComponent
 
 
 sealed class Event {
-    object ItemCreated : Event()
-    object ItemDeleted : Event()
+    sealed class ItemCreated : Event() {
+        object TaskCreated : ItemCreated()
+        object CategoryCreated : ItemCreated()
+    }
+
+    sealed class ItemDeleted : Event() {
+        object TaskDeleted : ItemDeleted()
+        object CategoryDeleted : ItemDeleted()
+    }
+
     class ItemUpdated(val item: Item) : Event()
-    // todo viewMode: ViewMode does not look good! change this!
-    class ListItemsButtonClicked(val viewMode: ViewMode) : Event()
+    class ViewModeChanged(val viewMode: ViewMode) : Event()
 }
 
 interface Mediator {
@@ -24,9 +32,19 @@ class MainMediator : Mediator {
 
     override fun notify(sender: JComponent, event: Event) {
         when (event) {
+            is Event.ItemCreated.CategoryCreated,
+            is Event.ItemDeleted.CategoryDeleted -> {
+                sidebar.refresh(category = true)
+            }
+
+            is Event.ItemCreated.TaskCreated,
+            is Event.ItemDeleted.TaskDeleted -> {
+                sidebar.refresh()
+            }
+
             is Event.ItemUpdated -> itemCreationPanel.editItemPanel(event.item)
-            is Event.ItemCreated, Event.ItemDeleted -> contentPanel.refresh()
-            is Event.ListItemsButtonClicked -> {
+
+            is Event.ViewModeChanged -> {
                 when (val view = event.viewMode) {
                     is ViewMode.Empty -> {}
                     is ViewMode.Categories -> contentPanel.showCategories()

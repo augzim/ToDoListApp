@@ -1,5 +1,6 @@
 package ui
 
+import database.Category
 import database.DeadlineFilter
 import database.TimeFilter
 import service.ItemService
@@ -16,6 +17,9 @@ class Sidebar(
     val itemService: ItemService,
     val mediator: Mediator
 ) : JPanel() {
+    private var tasksPanel: JPanel
+    private var tasksByCategoryPanel: JPanel
+
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         background = color
@@ -24,7 +28,7 @@ class Sidebar(
         createButtonAndAddToPanel("categories", ViewMode.Categories, this)
 
         // tasks
-        val tasksPanel = createCollapsibleSubPanel("tasks", this)
+        tasksPanel = createCollapsibleSubPanel("tasks", this)
 
         // tasks by time
         val tasksByTimePanel = createCollapsibleSubPanel("by time", tasksPanel)
@@ -47,9 +51,9 @@ class Sidebar(
         }
 
         // tasks by category
-        val tasksByCategoryPanel = createCollapsibleSubPanel("by category", tasksPanel)
-        val categories = itemService.getAllCategories()
-        for (category in categories) {
+        tasksByCategoryPanel = createCollapsibleSubPanel("by category", tasksPanel)
+        // todo: duplicates below
+        itemService.getAllCategories().forEach { category ->
             createButtonAndAddToPanel(
                 category.title,
                 ViewMode.TasksByCategory(category.id),
@@ -68,7 +72,7 @@ class Sidebar(
             createButton(title) {
                 mediator.notify(
                     this,
-                    Event.ListItemsButtonClicked(viewMode)
+                    Event.ViewModeChanged(viewMode)
                 )
             }
         )
@@ -96,7 +100,21 @@ class Sidebar(
         return contentPanel
     }
 
-    private fun refresh() {
+    fun refreshTasksByCategoryPanel() {
+        tasksByCategoryPanel.removeAll()
+        itemService.getAllCategories().forEach { category ->
+            createButtonAndAddToPanel(
+                category.title,
+                ViewMode.TasksByCategory(category.id),
+                tasksByCategoryPanel
+            )
+        }
+    }
+
+    fun refresh(category: Boolean = false) {
+        if (category) {
+            refreshTasksByCategoryPanel()
+        }
         revalidate()
         repaint()
     }
