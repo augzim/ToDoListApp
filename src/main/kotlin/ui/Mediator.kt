@@ -1,7 +1,6 @@
 package ui
 
 import database.Item
-import database.Task
 import javax.swing.JComponent
 
 
@@ -35,11 +34,18 @@ class MainMediator : Mediator {
             is Event.ItemCreated.CategoryCreated,
             is Event.ItemDeleted.CategoryDeleted -> {
                 sidebar.refresh(category = true)
+                if (contentPanel.currentView == ViewMode.Categories) {
+                    contentPanel.showCategories()
+                }
             }
 
             is Event.ItemCreated.TaskCreated,
             is Event.ItemDeleted.TaskDeleted -> {
                 sidebar.refresh()
+                // todo change to tasks
+//                if (contentPanel.currentView == ViewMode.Categories) {
+//                    contentPanel.showCategories()
+//                }
             }
 
             is Event.ItemUpdated -> itemCreationPanel.editItemPanel(event.item)

@@ -23,7 +23,7 @@ class ContentPanel(
     val mediator: Mediator,
 ) : JPanel() {
     // todo what should be in init and what inside property block here?
-    private var currentView: ViewMode = ViewMode.Empty
+    var currentView: ViewMode = ViewMode.Empty
 
     init {
         background = Color.GREEN
