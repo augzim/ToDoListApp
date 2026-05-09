@@ -2,7 +2,7 @@ package ui
 
 import database.DeadlineFilter
 import database.TimeFilter
-import database.ToDoDataAccessObject
+import service.ItemService
 import java.awt.Color
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
@@ -10,132 +10,94 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 
-// todo refactor
-// todo remove color from constructor
-// todo replace dao with ItemService!
+// todo remove color from constructor?
 class Sidebar(
     val color: Color,
-    val dao: ToDoDataAccessObject,
+    val itemService: ItemService,
     val mediator: Mediator
 ) : JPanel() {
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         background = color
 
-
-        // todo this here are  buttons, not panels
         // categories
-        val categoriesButton = JButton("categories").apply {
-            addActionListener {
-                mediator.notify(
-                    this,
-                    Event.ListItemsButtonClicked(ViewMode.Categories)
-                )
-            }
-        }
+        createButtonAndAddToPanel("categories", ViewMode.Categories, this)
 
         // tasks
-        val tasksByPanel = createSubPanel(color, indent = 20)
-        // todo repeats 4 times
-        val tasksButton = JButton("tasks").apply {
-            addActionListener {
-                tasksByPanel.isVisible = !tasksByPanel.isVisible
-                revalidate()
-                repaint()
-            }
-        }
+        val tasksPanel = createCollapsibleSubPanel("tasks", this)
 
-        // todo add everything in the end
-        //  via apply?
-
-        add(categoriesButton)
-        add(tasksButton)
-        add(tasksByPanel)
-
-        // by time
-        val tasksByTimePanel = createSubPanel(color, indent = 20)
-        val tasksByTimeButton = JButton("by time")
-
-
-        tasksByPanel.add(tasksByTimeButton)
-        tasksByPanel.add(tasksByTimePanel)
-
+        // tasks by time
+        val tasksByTimePanel = createCollapsibleSubPanel("by time", tasksPanel)
         TimeFilter.entries.forEach { timeFilter ->
-            var button = JButton(timeFilter.toString().lowercase())
-            tasksByTimePanel.add(button)
-            button.addActionListener {
-                mediator.notify(
-                    this,
-                    Event.ListItemsButtonClicked(ViewMode.TasksByTime(timeFilter))
-                )
-            }
-
+            createButtonAndAddToPanel(
+                timeFilter.toString().lowercase(),
+                ViewMode.TasksByTime(timeFilter),
+                tasksByTimePanel
+            )
         }
 
-        tasksByTimeButton.addActionListener {
-            tasksByTimePanel.isVisible = !tasksByTimePanel.isVisible
-            revalidate()
-            repaint()
-        }
-
-
-        // by deadline
-        val tasksByDeadlineButton = JButton("by deadline")
-        tasksByPanel.add(tasksByDeadlineButton)
-        val tasksByDeadlinePanel = createSubPanel(color, indent = 20)
-        tasksByPanel.add(tasksByDeadlinePanel)
-
+        // tasks by deadline
+        val tasksByDeadlinePanel = createCollapsibleSubPanel("by deadline", tasksPanel)
         DeadlineFilter.entries.forEach { deadlineFilter ->
-            var button = JButton(deadlineFilter.toString().lowercase().replace('_', ' '))
-            tasksByDeadlinePanel.add(button)
-            button.addActionListener {
-                mediator.notify(
-                    this,
-                    Event.ListItemsButtonClicked(ViewMode.TasksByDeadline(deadlineFilter))
-                )
-            }
+            createButtonAndAddToPanel(
+                deadlineFilter.toString().lowercase().replace('_', ' '),
+                ViewMode.TasksByDeadline(deadlineFilter),
+                tasksByDeadlinePanel
+            )
         }
 
-        tasksByDeadlineButton.addActionListener {
-            tasksByDeadlinePanel.isVisible = !tasksByDeadlinePanel.isVisible
-            revalidate()
-            repaint()
-        }
-
-
-        // by category
-        val tasksByCategoryButton = JButton("by category")
-        tasksByPanel.add(tasksByCategoryButton)
-        val tasksByCategoryPanel = createSubPanel(color, indent = 20)
-        tasksByPanel.add(tasksByCategoryPanel)
-
-        val categories = dao.getAllCategories()
-
+        // tasks by category
+        val tasksByCategoryPanel = createCollapsibleSubPanel("by category", tasksPanel)
+        val categories = itemService.getAllCategories()
         for (category in categories) {
-            var button = JButton(category.title)
-            tasksByCategoryPanel.add(button)
-            button.addActionListener {
-                mediator.notify(
-                    this,
-                    Event.ListItemsButtonClicked(ViewMode.TasksByCategory(category.id))
-                )
-            }
+            createButtonAndAddToPanel(
+                category.title,
+                ViewMode.TasksByCategory(category.id),
+                tasksByCategoryPanel
+            )
         }
-
-        tasksByCategoryButton.addActionListener {
-            tasksByCategoryPanel.isVisible = !tasksByCategoryPanel.isVisible
-            revalidate()
-            repaint()
-        }
-
     }
 
-    fun createSubPanel(color: Color, indent: Int = 20): JPanel {
-        return JPanel().apply {
+    private fun createButton(title: String, onClick: () -> Unit) =
+        JButton(title).apply {
+            addActionListener { onClick() }
+        }
+
+    private fun createButtonAndAddToPanel(title: String, viewMode: ViewMode, parentPanel: JPanel) {
+        parentPanel.add(
+            createButton(title) {
+                mediator.notify(
+                    this,
+                    Event.ListItemsButtonClicked(viewMode)
+                )
+            }
+        )
+    }
+
+    private fun createEmptySubPanel(color: Color, leftIndent: Int = 20) =
+        JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
-            border = BorderFactory.createEmptyBorder(0, indent, 0, 0)
+            border = BorderFactory.createEmptyBorder(0, leftIndent, 0, 0)
             background = color
             isVisible = false
         }
+
+    private fun createCollapsibleSubPanel(
+        title: String,
+        parentPanel: JPanel
+    ): JPanel {
+        val contentPanel = createEmptySubPanel(color)
+        val toggleButton = createButton(title) {
+            contentPanel.isVisible = !contentPanel.isVisible
+            refresh()
+        }
+        parentPanel.add(toggleButton)
+        parentPanel.add(contentPanel)
+        return contentPanel
+    }
+
+    private fun refresh() {
+        revalidate()
+        repaint()
     }
 }

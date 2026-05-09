@@ -34,7 +34,7 @@ fun main() {
         val contentPanelView = ContentPanel(itemService, mediator)
         val sidebarView = Sidebar(
             Color.PINK,
-            dao,
+            itemService,
             mediator
         )
         val itemCreationPanelView =
