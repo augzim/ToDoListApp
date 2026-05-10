@@ -29,6 +29,9 @@ class ItemService(val dao: ToDoDataAccessObject) {
     fun getAllCategories(): List<Category> =
         dao.getAllCategories()
 
+    fun getAllTasks(): List<Task> =
+        dao.getAllTasks()
+
     fun getTasksByTime(filter: TimeFilter): List<Task> =
         dao.getTasksByTime(filter)
 

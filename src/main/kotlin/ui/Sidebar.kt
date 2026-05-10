@@ -12,6 +12,7 @@ import javax.swing.JPanel
 
 
 // todo remove color from constructor?
+// todo refactor class
 class Sidebar(
     val color: Color,
     val itemService: ItemService,
@@ -29,6 +30,9 @@ class Sidebar(
 
         // tasks
         tasksPanel = createCollapsibleSubPanel("tasks", this)
+
+        // all
+        createButtonAndAddToPanel("all", ViewMode.Tasks, tasksPanel)
 
         // tasks by time
         val tasksByTimePanel = createCollapsibleSubPanel("by time", tasksPanel)

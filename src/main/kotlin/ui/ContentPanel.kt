@@ -35,6 +35,11 @@ class ContentPanel(
         refresh()
     }
 
+    fun showTasks() {
+        currentView = ViewMode.Tasks
+        refresh()
+    }
+
     fun showTasksByTime(filter: TimeFilter) {
         currentView = ViewMode.TasksByTime(filter)
         refresh()
@@ -54,6 +59,7 @@ class ContentPanel(
         val items: List<Item> = when (val view = currentView) {
             is ViewMode.Empty -> emptyList()
             is ViewMode.Categories -> itemService.getAllCategories()
+            is ViewMode.Tasks -> itemService.getAllTasks()
             is ViewMode.TasksByTime -> itemService.getTasksByTime(view.filter)
             is ViewMode.TasksByCategory -> itemService.getTasksByCategory(view.categoryId)
             is ViewMode.TasksByDeadline -> itemService.getTasksByDeadline(view.filter)

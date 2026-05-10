@@ -10,6 +10,7 @@ import javax.swing.*
 sealed class ViewMode {
     object Empty : ViewMode()
     object Categories : ViewMode()
+    object Tasks : ViewMode()
     data class TasksByTime(val filter: TimeFilter) : ViewMode()
     data class TasksByCategory(val categoryId: Int) : ViewMode()
     data class TasksByDeadline(val filter: DeadlineFilter) : ViewMode()

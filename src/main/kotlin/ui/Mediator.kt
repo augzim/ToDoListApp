@@ -48,6 +48,7 @@ class MainMediator : Mediator {
                 when (val view = event.viewMode) {
                     is ViewMode.Empty -> {}
                     is ViewMode.Categories -> contentPanel.showCategories()
+                    is ViewMode.Tasks -> contentPanel.showTasks()
                     is ViewMode.TasksByTime -> contentPanel.showTasksByTime(view.filter)
                     is ViewMode.TasksByCategory -> contentPanel.showTasksByCategory(view.categoryId)
                     is ViewMode.TasksByDeadline -> contentPanel.showTasksByDeadline(view.filter)
