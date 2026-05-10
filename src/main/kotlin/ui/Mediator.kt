@@ -34,18 +34,12 @@ class MainMediator : Mediator {
             is Event.ItemCreated.CategoryCreated,
             is Event.ItemDeleted.CategoryDeleted -> {
                 sidebar.refresh(category = true)
-                if (contentPanel.currentView == ViewMode.Categories) {
-                    contentPanel.showCategories()
-                }
+                contentPanel.refresh()
             }
 
             is Event.ItemCreated.TaskCreated,
             is Event.ItemDeleted.TaskDeleted -> {
-                sidebar.refresh()
-                // todo change to tasks
-//                if (contentPanel.currentView == ViewMode.Categories) {
-//                    contentPanel.showCategories()
-//                }
+                contentPanel.refresh()
             }
 
             is Event.ItemUpdated -> itemCreationPanel.editItemPanel(event.item)
