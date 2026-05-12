@@ -5,6 +5,7 @@ import database.DeadlineFilter
 import database.Item
 import database.Task
 import database.TimeFilter
+import database.WithDeadlineFilter
 import service.ItemService
 import java.awt.Color
 import java.text.SimpleDateFormat
@@ -55,6 +56,11 @@ class ContentPanel(
         refresh()
     }
 
+    fun showTasksWithDeadline(filter: WithDeadlineFilter) {
+        currentView = ViewMode.TasksWithDeadline(filter)
+        refresh()
+    }
+
     fun refresh() {
         val items: List<Item> = when (val view = currentView) {
             is ViewMode.Empty -> emptyList()
@@ -63,6 +69,7 @@ class ContentPanel(
             is ViewMode.TasksByTime -> itemService.getTasksByTime(view.filter)
             is ViewMode.TasksByCategory -> itemService.getTasksByCategory(view.categoryId)
             is ViewMode.TasksByDeadline -> itemService.getTasksByDeadline(view.filter)
+            is ViewMode.TasksWithDeadline -> itemService.getTasksWithDeadline(view.filter)
         }
 
         render(items)

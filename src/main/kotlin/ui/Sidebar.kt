@@ -3,6 +3,7 @@ package ui
 import database.Category
 import database.DeadlineFilter
 import database.TimeFilter
+import database.WithDeadlineFilter
 import service.ItemService
 import java.awt.Color
 import javax.swing.BorderFactory
@@ -31,7 +32,7 @@ class Sidebar(
         // tasks
         tasksPanel = createCollapsibleSubPanel("tasks", this)
 
-        // all
+        // all tasks
         createButtonAndAddToPanel("all", ViewMode.Tasks, tasksPanel)
 
         // tasks by time
@@ -47,12 +48,27 @@ class Sidebar(
         // tasks by deadline
         val tasksByDeadlinePanel = createCollapsibleSubPanel("by deadline", tasksPanel)
         DeadlineFilter.entries.forEach { deadlineFilter ->
-            createButtonAndAddToPanel(
-                deadlineFilter.toString().lowercase().replace('_', ' '),
-                ViewMode.TasksByDeadline(deadlineFilter),
-                tasksByDeadlinePanel
-            )
+            if (deadlineFilter == DeadlineFilter.WITH_DEADLINE) {
+                val tasksWithDeadlinePanel = createCollapsibleSubPanel(
+                    deadlineFilter.toString().lowercase().replace('_', ' '),
+                    tasksByDeadlinePanel
+                )
+                WithDeadlineFilter.entries.forEach { tasksWithDeadlineType ->
+                    createButtonAndAddToPanel(
+                        tasksWithDeadlineType.toString().lowercase(),
+                        ViewMode.TasksWithDeadline(tasksWithDeadlineType),
+                        tasksWithDeadlinePanel
+                    )
+                }
+            } else if (deadlineFilter == DeadlineFilter.WITHOUT_DEADLINE) {
+                createButtonAndAddToPanel(
+                    deadlineFilter.toString().lowercase().replace('_', ' '),
+                    ViewMode.TasksByDeadline(deadlineFilter),
+                    tasksByDeadlinePanel
+                )
+            }
         }
+
 
         // tasks by category
         tasksByCategoryPanel = createCollapsibleSubPanel("by category", tasksPanel)

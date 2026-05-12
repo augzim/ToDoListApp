@@ -46,6 +46,12 @@ enum class DeadlineFilter {
 }
 
 
+enum class WithDeadlineFilter {
+    CURRENT,
+    OVERDUE
+}
+
+
 fun getConnection(): Connection {
     val port = System.getenv("DB_PORT")
     val dbName = System.getenv("DB_NAME")
@@ -354,8 +360,28 @@ open class ToDoDataAccessObject(private val conn: Connection) {
     fun getTasksByDeadline(deadlineFilter: DeadlineFilter): List<Task> {
         val result = mutableListOf<Task>()
         val condition = when (deadlineFilter) {
-            DeadlineFilter.WITH_DEADLINE    -> "deadline IS NOT NULL"
+            DeadlineFilter.WITH_DEADLINE -> "deadline IS NOT NULL"
             DeadlineFilter.WITHOUT_DEADLINE -> "deadline IS NULL"
+        }
+        val stmt = conn.prepareStatement(
+            """
+            SELECT *
+            FROM tasks
+            WHERE $condition
+            """.trimIndent()
+        )
+        val rs = stmt.executeQuery()
+        while (rs.next()) {
+            result.add(createTaskInstance(rs))
+        }
+        return result
+    }
+
+    fun getTasksWithDeadline(withDeadlineFilter: WithDeadlineFilter): List<Task> {
+        val result = mutableListOf<Task>()
+        val condition = when (withDeadlineFilter) {
+            WithDeadlineFilter.CURRENT -> "deadline > CURRENT_TIMESTAMP"
+            WithDeadlineFilter.OVERDUE -> "deadline <= CURRENT_TIMESTAMP"
         }
         val stmt = conn.prepareStatement(
             """

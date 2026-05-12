@@ -6,6 +6,7 @@ import database.Item
 import database.Task
 import database.TimeFilter
 import database.ToDoDataAccessObject
+import database.WithDeadlineFilter
 import java.sql.Timestamp
 
 
@@ -40,6 +41,9 @@ class ItemService(val dao: ToDoDataAccessObject) {
 
     fun getTasksByDeadline(filter: DeadlineFilter): List<Task> =
         dao.getTasksByDeadline(filter)
+
+    fun getTasksWithDeadline(filter: WithDeadlineFilter): List<Task> =
+        dao.getTasksWithDeadline(filter)
 
     // ---------- DELETE ----------
     fun delete(item: Item) {

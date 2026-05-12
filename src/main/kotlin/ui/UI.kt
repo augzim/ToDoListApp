@@ -3,6 +3,7 @@ package ui
 import database.DeadlineFilter
 import database.Item
 import database.TimeFilter
+import database.WithDeadlineFilter
 import java.awt.Component
 import javax.swing.*
 
@@ -14,6 +15,7 @@ sealed class ViewMode {
     data class TasksByTime(val filter: TimeFilter) : ViewMode()
     data class TasksByCategory(val categoryId: Int) : ViewMode()
     data class TasksByDeadline(val filter: DeadlineFilter) : ViewMode()
+    data class TasksWithDeadline(val filter: WithDeadlineFilter) : ViewMode()
 }
 
 class TitleListCellRenderer : DefaultListCellRenderer() {

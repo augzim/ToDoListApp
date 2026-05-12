@@ -52,6 +52,7 @@ class MainMediator : Mediator {
                     is ViewMode.TasksByTime -> contentPanel.showTasksByTime(view.filter)
                     is ViewMode.TasksByCategory -> contentPanel.showTasksByCategory(view.categoryId)
                     is ViewMode.TasksByDeadline -> contentPanel.showTasksByDeadline(view.filter)
+                    is ViewMode.TasksWithDeadline -> contentPanel.showTasksWithDeadline(view.filter)
                 }
             }
         }
